@@ -262,6 +262,12 @@ in `.env`.
 
 ```bash
 uv run python validate_services.py
+
+You can also send a single live query with:
+
+```bash
+uv run python test_client/query.py
+```
 ```
 
 Expected success pattern:
@@ -338,7 +344,7 @@ SECTION 10.3 — Fixed stateless agent, two sequential calls
   status          : success
   context_count   : 5
   source_service  : https://policy-retrieval-xxxx-uc.a.run.app/retrieve
-  cache_hit       : N/A — no in-process cache exists
+  cache_hits      : N/A — no in-process cache exists
 
 OBSERVATION:
   Both requests returned consistent results.
@@ -385,6 +391,12 @@ bash scripts/deploy_service_b.sh
 # Copy the resulting Cloud Run URL into AGENT_SERVICE_URL in .env
 
 uv run python validate_services.py
+
+You can also send a single live query with:
+
+```bash
+uv run python test_client/query.py
+```
 ```
 
 ---
