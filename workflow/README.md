@@ -20,3 +20,8 @@ Each file includes:
 
 These files are written so you can lift the diagram block directly into the
 chapter manuscript or adapt the wording for figure captions.
+
+
+## Editorial appendix
+
+- `all-diagrams.md` → one-file appendix with every chapter diagram in order
