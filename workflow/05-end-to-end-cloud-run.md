@@ -2,17 +2,19 @@
 
 ## Caption
 
-The deployed system uses two Cloud Run services. The agent backend receives the
-user query, the retrieval service fetches durable context, and the grounded
-answer returns without relying on in-process state.
+This figure shows the full path of a real question in the fixed design. The
+user talks to the agent service, the agent service asks the retrieval service
+for supporting evidence, and the retrieval service looks that evidence up in
+Vertex AI RAG Engine. The answer comes back grounded in retrieved documents,
+not in whatever one container happened to remember.
 
 ## Mermaid
 
 ```mermaid
 flowchart TD
-    A[Reader or test client] -->|POST /query| B[Cloud Run Service B\npolicy-agent]
-    B -->|POST /retrieve| C[Cloud Run Service A\npolicy-retrieval]
-    C -->|RAG query| D[Vertex AI RAG Engine]
+    A[Reader or test client asks a question] -->|POST /query| B[Cloud Run Service B\npolicy-agent answers the user]
+    B -->|POST /retrieve| C[Cloud Run Service A\npolicy-retrieval finds evidence]
+    C -->|RAG query| D[Vertex AI RAG Engine stores searchable company knowledge]
     D -->|Retrieved contexts| C
     C -->|Retrieved contexts| B
     B -->|Grounded answer| A
@@ -20,7 +22,7 @@ flowchart TD
 
 ## What the reader should notice
 
-- Readers interact with one public backend, Service B.
-- Service B delegates retrieval rather than owning it.
-- Service A provides a stable retrieval API for any worker.
-- The architecture supports resilience because no answer depends on local memory surviving.
+- The reader speaks to only one public service, Service B.
+- Service B does not need to store company knowledge in memory.
+- Service A exists to fetch the right evidence for the question.
+- The final answer is reliable because every worker can reach the same knowledge source.
