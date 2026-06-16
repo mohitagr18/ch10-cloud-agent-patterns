@@ -2,24 +2,24 @@
 
 ## Caption
 
-Concurrent requests make the statelessness problem easier to see. Two workers
-can handle the same query at the same time, and both start with empty
-in-process state.
+Concurrent traffic makes the state problem easier to see. Two requests can be
+handled at the same time by separate workers, and each worker begins with its
+own isolated in-process state.
 
 ## Mermaid
 
 ```mermaid
 flowchart LR
-    A[Concurrent Request A] --> B[Worker 1 / Container X]
-    C[Concurrent Request B] --> D[Worker 2 / Container Y]
-    B --> E[Local cache in X]
-    D --> F[Local cache in Y]
-    E -.not shared.-> F
+    A[Concurrent request A] --> B[Worker 1 in container X]
+    C[Concurrent request B] --> D[Worker 2 in container Y]
+    B --> E[Local cache inside X]
+    D --> F[Local cache inside Y]
+    E -.no shared memory boundary.-> F
 ```
 
 ## What the reader should notice
 
-- Each worker owns its own process memory.
-- Cached retrievals, session history, and loaded state stay local to that worker.
-- Concurrency does not merge memory. It multiplies isolated memory islands.
-- This is why stateful agent backends become unreliable in serverless systems.
+- Concurrency increases the number of isolated worker memories.
+- Cached retrievals and session state stay trapped inside one worker.
+- A multi-worker backend is not a shared-memory system.
+- This is why stateful agent servers become unreliable under real load.
