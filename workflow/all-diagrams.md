@@ -1,8 +1,8 @@
 # Chapter 10 workflow diagrams
 
-This appendix-style file collects every Mermaid diagram for Chapter 10 in one
-place, in chapter order. Use it as an editorial handoff document, a review aid,
-or a quick source for manuscript figures.
+This appendix-style file gathers every Mermaid diagram for Chapter 10 in one
+place, in chapter order. Use it for editorial review, figure planning, or
+manuscript handoff.
 
 ---
 
@@ -10,16 +10,16 @@ or a quick source for manuscript figures.
 
 ```mermaid
 flowchart TD
-    A[Reader sends Request 1] --> B[Cloud Run container A]
-    B --> C[In-process cache stores retrieval result]
-    D[Reader sends Request 2] --> E[Cloud Run container B]
-    E --> F[Container B has empty in-process cache]
+    A[Request 1 from reader] --> B[Cloud Run container A]
+    B --> C[Retrieval result cached in process memory]
+    D[Request 2 from reader] --> E[Cloud Run container B]
+    E --> F[Process memory starts empty]
 
-    C -.not shared.-> F
+    C -.memory is not shared across containers.-> F
 ```
 
-**Figure intent:** Show that the second cloud request may land on a different
-container, so in-process state disappears.
+**Figure intent:** Show that local success can hide the loss of in-process state
+once requests begin landing on separate cloud containers.
 
 ---
 
@@ -27,15 +27,15 @@ container, so in-process state disappears.
 
 ```mermaid
 flowchart LR
-    A[Concurrent Request A] --> B[Worker 1 / Container X]
-    C[Concurrent Request B] --> D[Worker 2 / Container Y]
-    B --> E[Local cache in X]
-    D --> F[Local cache in Y]
-    E -.not shared.-> F
+    A[Concurrent request A] --> B[Worker 1 in container X]
+    C[Concurrent request B] --> D[Worker 2 in container Y]
+    B --> E[Local cache inside X]
+    D --> F[Local cache inside Y]
+    E -.no shared memory boundary.-> F
 ```
 
-**Figure intent:** Show that concurrency creates multiple isolated memory
-islands, not a shared stateful backend.
+**Figure intent:** Show that concurrent requests multiply isolated worker
+memories rather than creating a shared stateful system.
 
 ---
 
@@ -44,15 +44,15 @@ islands, not a shared stateful backend.
 ```mermaid
 flowchart TD
     A[Reader request] --> B[Stateless agent worker]
-    B --> C[HTTP call to retrieval service]
+    B --> C[HTTP request to retrieval service]
     C --> D[Vertex AI RAG corpus]
     D --> C
     C --> B
-    B --> E[Grounded response]
+    B --> E[Grounded response returned to reader]
 ```
 
-**Figure intent:** Show that the fix is architectural. Retrieval moves out of
-process and becomes externally shared.
+**Figure intent:** Show that the fix is architectural. Retrieval becomes an
+external shared capability instead of a local worker detail.
 
 ---
 
@@ -66,7 +66,7 @@ flowchart TD
     B -->|JSON contexts| A
 ```
 
-**Figure intent:** Show the new service boundary introduced by the chapter.
+**Figure intent:** Show the retrieval boundary introduced by the chapter.
 
 ---
 
@@ -80,12 +80,12 @@ policy-agent]
 policy-retrieval]
     C -->|RAG query| D[Vertex AI RAG Engine]
     D --> C
-    C -->|retrieved contexts| B
-    B -->|grounded answer| A
+    C -->|Retrieved contexts| B
+    B -->|Grounded answer| A
 ```
 
-**Figure intent:** Show the full production path from client request to grounded
-answer.
+**Figure intent:** Show the complete production path from user request to
+retrieved context to grounded answer.
 
 ---
 
@@ -93,8 +93,8 @@ answer.
 
 ```mermaid
 flowchart LR
-    A[.env or gcloud deploy flags] --> B[Service A env]
-    A --> C[Service B env]
+    A[.env file or gcloud deploy flags] --> B[Service A environment]
+    A --> C[Service B environment]
 
     B --> D[RAG_CORPUS]
     B --> E[GOOGLE_CLOUD_PROJECT]
@@ -106,8 +106,8 @@ flowchart LR
     C --> J[GOOGLE_CLOUD_LOCATION]
 ```
 
-**Figure intent:** Show that service discovery and cloud configuration happen at
-deploy time, not through hardcoded values.
+**Figure intent:** Show that service discovery and cloud configuration are set
+at deployment time rather than embedded in source code.
 
 ---
 
@@ -120,7 +120,7 @@ flowchart LR
         B1 --> C1[In-process cache]
         D1[Next request] --> E1[Cloud Run agent worker B]
         E1 --> F1[Empty in-process cache]
-        C1 -.not shared.-> F1
+        C1 -.cached state does not cross worker boundaries.-> F1
     end
 
     subgraph Fixed[Fixed cloud architecture]
@@ -133,4 +133,5 @@ flowchart LR
     end
 ```
 
-**Figure intent:** Provide one summary visual for the chapter's core argument.
+**Figure intent:** Provide one summary figure for the chapter's central
+architectural contrast.
