@@ -2,25 +2,25 @@
 
 ## Caption
 
-A stateful agent can appear correct on a laptop because both requests hit the
-same Python process. In Cloud Run, the second request may land on a different
-container, so the in-process cache disappears.
+A stateful agent can look correct in local development because repeated calls
+hit the same Python process. In Cloud Run, the next request may land on a
+separate container, so the earlier in-process cache is no longer available.
 
 ## Mermaid
 
 ```mermaid
 flowchart TD
-    A[Reader sends Request 1] --> B[Cloud Run container A]
-    B --> C[In-process cache stores retrieval result]
-    D[Reader sends Request 2] --> E[Cloud Run container B]
-    E --> F[Container B has empty in-process cache]
+    A[Request 1 from reader] --> B[Cloud Run container A]
+    B --> C[Retrieval result cached in process memory]
+    D[Request 2 from reader] --> E[Cloud Run container B]
+    E --> F[Process memory starts empty]
 
-    C -.not shared.-> F
+    C -.memory is not shared across containers.-> F
 ```
 
 ## What the reader should notice
 
-- The local mental model assumes one long-lived process.
-- Cloud Run routes requests to whichever container is available.
-- Memory inside container A is invisible to container B.
-- The failure is architectural, not a Python bug.
+- Local success can hide a cloud deployment flaw.
+- Each Cloud Run container owns its own process memory.
+- The second request does not inherit the first request's cached state.
+- The failure comes from the deployment model, not from Python itself.
