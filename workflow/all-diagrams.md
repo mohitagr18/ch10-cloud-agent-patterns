@@ -60,17 +60,20 @@ external shared capability instead of a local worker detail.
 
 ```mermaid
 flowchart TD
-    A[Service B: policy-agent] -->|POST /retrieve| B[Service A: policy-retrieval]
-    B -->|Calls rag.retrieval_query()| C[Vertex AI RAG Engine]
+    A[Service B: policy-agent gets the user question] -->|POST /retrieve| B[Service A: policy-retrieval looks up evidence]
+    B -->|Calls rag.retrieval_query()| C[Vertex AI RAG Engine stores the searchable knowledge]
     C -->|Retrieved contexts| B
     B -->|Returns JSON contexts| A
 ```
 
-**Figure intent:** Show the retrieval boundary introduced by the chapter.
+**Figure intent:** Show that the agent no longer tries to remember knowledge in
+its own process. Instead, it asks a dedicated retrieval service for document
+backing every time it needs evidence.
+
 
 ---
 
-## 10.5 End-to-end resilient cloud flow
+# 10.5 End-to-end resilient cloud flow
 
 ```mermaid
 flowchart TD
