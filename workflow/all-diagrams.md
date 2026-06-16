@@ -61,9 +61,9 @@ external shared capability instead of a local worker detail.
 ```mermaid
 flowchart TD
     A[Service B: policy-agent] -->|POST /retrieve| B[Service A: policy-retrieval]
-    B -->|rag.retrieval_query()| C[Vertex AI RAG Engine]
-    C --> B
-    B -->|JSON contexts| A
+    B -->|Calls rag.retrieval_query()| C[Vertex AI RAG Engine]
+    C -->|Retrieved contexts| B
+    B -->|Returns JSON contexts| A
 ```
 
 **Figure intent:** Show the retrieval boundary introduced by the chapter.
@@ -74,12 +74,10 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Reader or test client] -->|POST /query| B[Cloud Run Service B
-policy-agent]
-    B -->|POST /retrieve| C[Cloud Run Service A
-policy-retrieval]
+    A[Reader or test client] -->|POST /query| B[Cloud Run Service B\npolicy-agent]
+    B -->|POST /retrieve| C[Cloud Run Service A\npolicy-retrieval]
     C -->|RAG query| D[Vertex AI RAG Engine]
-    D --> C
+    D -->|Retrieved contexts| C
     C -->|Retrieved contexts| B
     B -->|Grounded answer| A
 ```
