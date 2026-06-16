@@ -81,7 +81,54 @@ def create_agent(config: AgentServiceConfig) -> Agent:
             "You are an enterprise documentation assistant. "
             "When a user asks about company policy, call retrieve_policy_context to get "
             "relevant policy excerpts, then answer clearly and directly. "
-            "If the tool returns an error or no contexts, say so plainly instead of guessing."
+            "If the tool returns an error or no contexts, say so plainly instead of guessing. "
+            "Use the retrieved context as your grounding source."
         ),
         tools=[retrieve_policy_context],
     )
+
+
+def run_retrieval_step(agent: Agent, query: str) -> dict:
+    """Execute the retrieval step that the ADK agent would use during a query.
+
+    This helper makes the execution path explicit for chapter readers. The
+    service still constructs a real ADK Agent instance, but the request handler
+    invokes the grounded retrieval step directly so the flow is deterministic,
+    transparent, and easy to inspect in terminal output.
+
+    Why this matters for the chapter:
+      The chapter is teaching a cloud deployment pattern, not agent-framework
+      internals. This helper keeps the runtime observable without hiding the
+      critical architectural point behind opaque ADK orchestration details.
+
+    Args:
+        agent: The configured ADK agent instance.
+        query: The user question.
+
+    Returns:
+        The dict produced by the inline retrieve_policy_context tool.
+    """
+    tool_function = agent.tools[0]
+    return tool_function(query)
+
+
+def compose_grounded_answer(query: str, retrieval_result: dict) -> str:
+    """Build a deterministic grounded answer from retrieved contexts.
+
+    A full production agent might let the model synthesize the final answer.
+    For this chapter repo, we keep the answer path deterministic so readers can
+    see that the response came from external retrieval rather than hidden local
+    memory. That makes the statelessness lesson easier to verify.
+    """
+    if retrieval_result.get("status") == "error":
+        return retrieval_result.get("error_message", "Retrieval failed.")
+
+    contexts = retrieval_result.get("contexts", [])
+    if not contexts:
+        return (
+            f"No policy context was returned for the question: {query}. "
+            "Check whether your RAG corpus contains relevant documents."
+        )
+
+    top_context = contexts[0].get("text", "")
+    return top_context if top_context else "A context was returned, but it was empty."
