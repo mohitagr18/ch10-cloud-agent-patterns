@@ -2,9 +2,9 @@
 
 ## Caption
 
-This side-by-side comparison shows the chapter's main lesson in one figure. The
-broken version keeps retrieval state inside the agent worker. The fixed version
-moves retrieval behind an external FastAPI service backed by Vertex AI RAG
+This comparison figure captures the chapter's central lesson. The broken design
+keeps retrieval state inside the agent worker, while the fixed design places
+retrieval behind a shared external FastAPI service backed by Vertex AI RAG
 Engine.
 
 ## Mermaid
@@ -16,7 +16,7 @@ flowchart LR
         B1 --> C1[In-process cache]
         D1[Next request] --> E1[Cloud Run agent worker B]
         E1 --> F1[Empty in-process cache]
-        C1 -.not shared.-> F1
+        C1 -.cached state does not cross worker boundaries.-> F1
     end
 
     subgraph Fixed[Fixed cloud architecture]
@@ -31,7 +31,7 @@ flowchart LR
 
 ## What the reader should notice
 
-- In the broken design, memory is trapped inside whichever worker handled the last request.
-- In the fixed design, retrieval leaves the worker and moves to a shared external service.
-- The fixed version is reliable because every worker can reach the same retrieval boundary.
-- The architecture changes, not just the code style.
+- In the broken design, memory stays trapped inside one worker.
+- In the fixed design, retrieval moves to a shared service boundary.
+- Every worker can now reach the same retrieval system.
+- The key change is architectural, not cosmetic.
