@@ -11,9 +11,9 @@ retrieval.
 ```mermaid
 flowchart TD
     A[Service B: policy-agent] -->|POST /retrieve| B[Service A: policy-retrieval]
-    B -->|rag.retrieval_query()| C[Vertex AI RAG Engine]
-    C --> B
-    B -->|JSON contexts| A
+    B -->|Calls rag.retrieval_query()| C[Vertex AI RAG Engine]
+    C -->|Retrieved contexts| B
+    B -->|Returns JSON contexts| A
 ```
 
 ## What the reader should notice
