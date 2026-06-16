@@ -2,8 +2,9 @@
 
 ## Caption
 
-Service A wraps Vertex AI RAG Engine behind a small HTTP API. That service
-becomes the persistence boundary that every agent worker can call.
+Service A wraps Vertex AI RAG Engine behind a small FastAPI interface. That
+interface becomes the persistence boundary between agent reasoning and durable
+retrieval.
 
 ## Mermaid
 
@@ -17,7 +18,7 @@ flowchart TD
 
 ## What the reader should notice
 
-- Service A has one job: retrieval.
-- Service B has one job: agent orchestration.
-- The two services scale independently.
-- The RAG corpus lives outside both processes.
+- Service A is responsible only for retrieval.
+- Service B is responsible only for agent orchestration.
+- The services can scale and fail independently.
+- The RAG corpus remains outside both running processes.
