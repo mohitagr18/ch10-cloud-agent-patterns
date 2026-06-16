@@ -10,12 +10,10 @@ answer returns without relying on in-process state.
 
 ```mermaid
 flowchart TD
-    A[Reader or test client] -->|POST /query| B[Cloud Run Service B
-policy-agent]
-    B -->|POST /retrieve| C[Cloud Run Service A
-policy-retrieval]
+    A[Reader or test client] -->|POST /query| B[Cloud Run Service B\npolicy-agent]
+    B -->|POST /retrieve| C[Cloud Run Service A\npolicy-retrieval]
     C -->|RAG query| D[Vertex AI RAG Engine]
-    D --> C
+    D -->|Retrieved contexts| C
     C -->|Retrieved contexts| B
     B -->|Grounded answer| A
 ```
