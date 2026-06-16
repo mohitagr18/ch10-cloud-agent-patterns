@@ -11,6 +11,7 @@ architecture and failure patterns in Chapter 10.
 - `04-retrieval-service.md` → Section 10.4
 - `05-end-to-end-cloud-run.md` → Section 10.5
 - `06-env-wiring.md` → deployment and configuration explanation
+- `07-broken-vs-fixed.md` → side-by-side teaching figure for the chapter core argument
 
 Each file includes:
 - a Mermaid diagram
