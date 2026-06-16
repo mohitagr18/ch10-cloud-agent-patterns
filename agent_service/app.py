@@ -17,7 +17,11 @@ import structlog
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from agent_service.agent_factory import create_agent
+from agent_service.agent_factory import (
+    compose_grounded_answer,
+    create_agent,
+    run_retrieval_step,
+)
 from agent_service.config import AgentServiceConfig, load_config
 
 logger = structlog.get_logger("agent_service")
@@ -44,6 +48,7 @@ class QueryResponse(BaseModel):
     retrieval_service_url: str
     container_id: str
     cache_hits: str
+    execution_path: str
 
 
 @asynccontextmanager
@@ -114,11 +119,7 @@ def health() -> dict[str, str]:
 
 @app.get("/ready")
 def readiness() -> dict[str, str]:
-    """Return a readiness response distinct from health.
-
-    Splitting readiness from health makes the deployment pattern more realistic
-    and teaches readers where to put deeper dependency checks later.
-    """
+    """Return a readiness response distinct from health."""
     if config is None or agent is None:
         raise HTTPException(status_code=503, detail="Agent service not initialised yet.")
     return {"status": "ready"}
@@ -126,37 +127,34 @@ def readiness() -> dict[str, str]:
 
 @app.post("/query", response_model=QueryResponse)
 def query(payload: QueryRequest) -> dict[str, Any]:
-    """Process a user question by retrieving context from Service A.
+    """Process a user question through the agent's explicit retrieval path.
 
-    For the chapter, we return both the answer and the retrieved contexts so the
-    reader can see exactly what the backend used. In a production API you might
-    omit the raw contexts, but they are valuable here as a teaching aid.
+    The service constructs a real ADK agent instance at startup. For request
+    execution, it invokes the retrieval step explicitly, then composes a
+    deterministic grounded answer from the returned contexts. This keeps the
+    architecture transparent for readers while still showing the real ADK
+    integration point and inline tool pattern.
     """
     if config is None or agent is None:
         raise HTTPException(status_code=503, detail="Agent service is not ready.")
 
     try:
-        # For teaching clarity, call the retrieval tool directly and build a
-        # deterministic answer from the top context. This keeps the runtime
-        # concrete and observable even before a full ADK runner is added.
-        tool_function = agent.tools[0]
-        retrieval_result = tool_function(payload.query)
+        retrieval_result = run_retrieval_step(agent, payload.query)
 
         if retrieval_result.get("status") == "error":
             raise HTTPException(status_code=502, detail=retrieval_result["error_message"])
 
         contexts = retrieval_result.get("contexts", [])
-        answer = (
-            contexts[0]["text"] if contexts else "No relevant policy context was returned."
-        )
-
+        answer = compose_grounded_answer(payload.query, retrieval_result)
         container_id = os.getenv("K_REVISION", "local-dev-container")
+
         logger.info(
             "agent_query_complete",
             query=payload.query,
             context_count=len(contexts),
             retrieval_service_url=config.retrieval_service_url,
             container_id=container_id,
+            execution_path="adk_agent_inline_tool -> service_a_http -> grounded_answer",
         )
 
         return {
@@ -165,8 +163,8 @@ def query(payload: QueryRequest) -> dict[str, Any]:
             "context_count": len(contexts),
             "retrieval_service_url": config.retrieval_service_url,
             "container_id": container_id,
-            # Deliberately fixed to 0/N.A. because this service is stateless.
             "cache_hits": "N/A — stateless agent; no in-process cache exists",
+            "execution_path": "adk_agent_inline_tool -> service_a_http -> grounded_answer",
         }
     except HTTPException:
         raise
