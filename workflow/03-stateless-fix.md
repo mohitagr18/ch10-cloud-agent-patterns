@@ -2,24 +2,25 @@
 
 ## Caption
 
-The fix is not to make the cache smarter. The fix is to remove retrieval state
-from the agent process and move it behind a durable external service boundary.
+The solution is architectural. Retrieval state leaves the agent process and
+moves behind an external service boundary that every worker can reach in the
+same way.
 
 ## Mermaid
 
 ```mermaid
 flowchart TD
     A[Reader request] --> B[Stateless agent worker]
-    B --> C[HTTP call to retrieval service]
+    B --> C[HTTP request to retrieval service]
     C --> D[Vertex AI RAG corpus]
     D --> C
     C --> B
-    B --> E[Grounded response]
+    B --> E[Grounded response returned to reader]
 ```
 
 ## What the reader should notice
 
-- The agent worker carries no mutable retrieval state between requests.
-- Every request brings its own query and gets fresh retrieval over HTTP.
-- Retrieval consistency comes from the external service, not from process memory.
-- This pattern works no matter which Cloud Run instance handles the request.
+- The agent worker keeps no mutable retrieval state between requests.
+- Every request performs retrieval through the same external path.
+- Consistency comes from shared external infrastructure, not from local memory.
+- Any Cloud Run instance can now answer the request correctly.
