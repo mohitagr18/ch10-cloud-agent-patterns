@@ -2,9 +2,9 @@
 
 ## Caption
 
-The final deployed stack is a two-service Cloud Run architecture. The reader's
-query enters Service B, retrieval happens in Service A, and the answer returns
-with no dependency on in-process memory.
+The deployed system uses two Cloud Run services. The agent backend receives the
+user query, the retrieval service fetches durable context, and the grounded
+answer returns without relying on in-process state.
 
 ## Mermaid
 
@@ -16,13 +16,13 @@ policy-agent]
 policy-retrieval]
     C -->|RAG query| D[Vertex AI RAG Engine]
     D --> C
-    C -->|retrieved contexts| B
-    B -->|grounded answer| A
+    C -->|Retrieved contexts| B
+    B -->|Grounded answer| A
 ```
 
 ## What the reader should notice
 
-- The reader interacts with one public backend, Service B.
-- Service B does not retrieve from Vertex AI directly.
-- Service A isolates retrieval and can be observed, tested, and scaled separately.
-- This is the production pattern the chapter wants the reader to adopt.
+- Readers interact with one public backend, Service B.
+- Service B delegates retrieval rather than owning it.
+- Service A provides a stable retrieval API for any worker.
+- The architecture supports resilience because no answer depends on local memory surviving.
