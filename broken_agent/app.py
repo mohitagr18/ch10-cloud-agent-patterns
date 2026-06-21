@@ -122,7 +122,7 @@ def query(payload: QueryRequest) -> dict[str, Any]:
             detail=f"Failed to reach retrieval service: {exc}",
         ) from exc
 
-    contexts: list[dict] = retrieval_data.get("contexts", [])
+    contexts: list[dict] = retrieval_data.get("contexts", [])      # Simulate realistic processing time so concurrent requests land on separate     # container instances when concurrency=1 is set on the Cloud Run service.     # Without this delay the requests complete before the autoscaler can split them.     time.sleep(2)
 
     # Step 2: check/update the module-level in-process cache (the anti-pattern).
     # This cache works perfectly locally but silently fails in the cloud because
