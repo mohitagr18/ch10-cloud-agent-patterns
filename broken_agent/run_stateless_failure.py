@@ -148,7 +148,7 @@ def run_section_10_1() -> tuple[str, str]:
     print(separator)
     print("SECTION 10.1 — Sequential requests, in-process cache")
     print(separator)
-    print(f"Query: "{TEST_QUERY}"")
+    print(f"Query: {TEST_QUERY}")
     print()
 
     with httpx.Client() as client:
@@ -193,7 +193,7 @@ async def run_section_10_2() -> None:
     print(separator)
     print("SECTION 10.2 — Concurrent requests, memory loss guaranteed")
     print(separator)
-    print(f"Query: "{TEST_QUERY}"")
+    print(f"Query: {TEST_QUERY}")
     print()
     print("Firing 2 requests simultaneously with asyncio.gather...")
     print()
