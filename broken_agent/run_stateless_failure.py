@@ -41,7 +41,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 
 # The broken agent service is Service B deployed with the stateful agent.
 # After running scripts/deploy_service_b_broken.sh, set this URL in your .env.
-AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "").rstrip("/")
+AGENT_SERVICE_URL = (     os.getenv("BROKEN_AGENT_URL", "") or os.getenv("AGENT_SERVICE_URL", "") ).rstrip("/")
 TEST_QUERY = "What is the remote work policy?"
 REQUEST_TIMEOUT = 60.0  # Cloud Run cold starts can be slow
 
