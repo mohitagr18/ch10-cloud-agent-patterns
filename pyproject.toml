@@ -3,13 +3,13 @@ name = "ch10-cloud-agent-patterns"
 version = "1.0.0"
 description = "Chapter 10: From Local Triumph to Cloud Failure — enterprise knowledge-base agent on Cloud Run"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     # Core agent runtime
     "google-adk>=1.7.0,<2.0.0",
     "google-cloud-aiplatform[adk]>=1.92.0,<2.0.0",
-    # Retrieval layer — vertexai.preview.rag
-    "vertexai>=1.92.0,<2.0.0",
+    # Retrieval layer — google-cloud-aiplatform.preview.rag
+    "google-cloud-aiplatform>=1.92.0,<2.0.0",
     # API layer
     "fastapi>=0.115.0,<1.0.0",
     "uvicorn[standard]>=0.30.0,<1.0.0",

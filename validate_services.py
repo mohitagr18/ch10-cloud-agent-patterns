@@ -73,18 +73,14 @@ def check_service_a(client: httpx.Client) -> bool:
     print(f"  Body: {body}")
 
     if status_code == 200 and isinstance(body, dict) and body.get("status") == "healthy":
-        print("  ✓ Service A is healthy.
-")
+        print("  ✓ Service A is healthy.")
         return True
 
     print("  ✗ Service A health check failed.")
     print(
-        "    → Check Cloud Run logs:
-"
-        "      gcloud run services logs read policy-retrieval --region=YOUR_REGION
-"
-        "    Common causes: RAG_CORPUS missing, Vertex AI API disabled, or service startup failed.
-"
+        "    → Check Cloud Run logs:\n"
+        "      gcloud run services logs read policy-retrieval --region=YOUR_REGION\n"
+        "    Common causes: RAG_CORPUS missing, Vertex AI API disabled, or service startup failed."
     )
     return False
 
@@ -97,18 +93,14 @@ def check_service_b(client: httpx.Client) -> bool:
     print(f"  Body: {body}")
 
     if status_code == 200 and isinstance(body, dict) and body.get("status") == "healthy":
-        print("  ✓ Service B is healthy.
-")
+        print("  ✓ Service B is healthy.")
         return True
 
     print("  ✗ Service B health check failed.")
     print(
-        "    → Check Cloud Run logs:
-"
-        "      gcloud run services logs read policy-agent --region=YOUR_REGION
-"
-        "    Common causes: RETRIEVAL_SERVICE_URL missing, AGENT_MODEL missing, or startup config validation failed.
-"
+        "    → Check Cloud Run logs:\n"
+        "      gcloud run services logs read policy-agent --region=YOUR_REGION\n"
+        "    Common causes: RETRIEVAL_SERVICE_URL missing, AGENT_MODEL missing, or startup config validation failed."
     )
     return False
 
@@ -122,7 +114,7 @@ def run_end_to_end_test(client: httpx.Client) -> bool:
         {"query": TEST_QUERY},
     )
     print(f"  POST /query  →  HTTP {status_code}  ({elapsed_ms} ms)")
-    print(f"  Query: "{TEST_QUERY}"")
+    print(f'  Query: "{TEST_QUERY}"')
 
     if status_code != 200 or not isinstance(body, dict):
         print(f"  Body: {body}")
@@ -136,19 +128,17 @@ def run_end_to_end_test(client: httpx.Client) -> bool:
     context_count = body.get("context_count", 0)
     execution_path = body.get("execution_path", "N/A")
 
-    print(f"  Answer (first 150 chars): "{answer[:150]}"")
+    print(f'  Answer (first 150 chars): "{answer[:150]}"')
     print(f"  Context count: {context_count}")
     print(f"  Execution path: {execution_path}")
 
     if answer and context_count:
-        print("  ✓ End-to-end query succeeded.
-")
+        print("  ✓ End-to-end query succeeded.")
         return True
 
     print("  ✗ End-to-end query returned an empty answer or zero contexts.")
     print(
-        "    → Check that your RAG corpus is populated and that the query matches the content in your documents.
-"
+        "    → Check that your RAG corpus is populated and that the query matches the content in your documents."
     )
     return False
 

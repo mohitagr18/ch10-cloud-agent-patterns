@@ -1,0 +1,11 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-west1-docker.pkg.dev/project-a44fece1-48df-4c9b-ac9/ch10-images/policy-agent:latest'
+      - '-f'
+      - 'agent_service/Dockerfile'
+      - '.'
+images:
+  - 'us-west1-docker.pkg.dev/project-a44fece1-48df-4c9b-ac9/ch10-images/policy-agent:latest'

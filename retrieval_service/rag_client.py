@@ -30,7 +30,7 @@ def initialise_vertex_ai() -> None:
     """
     vertexai.init(
         project=os.getenv("GOOGLE_CLOUD_PROJECT"),
-        location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
+        location=os.getenv("GOOGLE_CLOUD_LOCATION"),
     )
 
 
