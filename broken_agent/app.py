@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import time
+import uuid
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -22,6 +23,9 @@ from pydantic import BaseModel, Field
 from broken_agent import stateful_agent
 
 logger = structlog.get_logger("policy-agent-broken")
+
+# Generate a unique container instance/process ID at startup
+INSTANCE_ID = f"{os.getenv('K_REVISION', 'local-dev-container')}-{uuid.uuid4().hex[:6]}"
 
 
 class QueryRequest(BaseModel):
@@ -145,7 +149,7 @@ def query(payload: QueryRequest) -> dict[str, Any]:
     else:
         answer = "No relevant policy context was found for your query."
 
-    container_id = os.environ.get("K_REVISION", "local-dev-container")
+    container_id = INSTANCE_ID
 
     logger.info(
         "broken_agent_query_complete",

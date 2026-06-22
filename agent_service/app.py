@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import time
+import uuid
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -23,6 +24,9 @@ from agent_service.agent_factory import (
     run_retrieval_step,
 )
 from agent_service.config import AgentServiceConfig, load_config
+
+# Generate a unique container instance/process ID at startup
+INSTANCE_ID = f"{os.getenv('K_REVISION', 'local-dev-container')}-{uuid.uuid4().hex[:6]}"
 
 logger = structlog.get_logger("agent_service")
 config: AgentServiceConfig | None = None
@@ -146,7 +150,7 @@ def query(payload: QueryRequest) -> dict[str, Any]:
 
         contexts = retrieval_result.get("contexts", [])
         answer = compose_grounded_answer(payload.query, retrieval_result)
-        container_id = os.getenv("K_REVISION", "local-dev-container")
+        container_id = INSTANCE_ID
 
         logger.info(
             "agent_query_complete",
