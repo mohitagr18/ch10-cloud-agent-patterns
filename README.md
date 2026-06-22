@@ -104,6 +104,7 @@ Expected in Section 10.2:
 unique_containers : 2
 shared_state      : False
 ```
+![Stateless Failure Demo Run](workflow/run_stateless_failure.png)
 
 ### Test 2 — Fixed agent (Section 10.3)
 
