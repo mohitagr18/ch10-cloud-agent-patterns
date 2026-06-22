@@ -362,9 +362,83 @@ If you see a **permission error** mentioning `aiplatform.ragCorpora.get`, double
 
 ---
 
-## 12. Build and deploy Service B (policy‑agent)
+## 12. Build and deploy the Broken Agent Service (policy-agent-broken)
 
-### 12.1. Ensure Service B uses env vars
+To demonstrate why in-process state fails across stateless cloud requests (Sections 10.1 and 10.2), build and deploy the broken agent variant.
+
+### 12.1. Update `cloudbuild_broken.yaml`
+Open `cloudbuild_broken.yaml` and replace the placeholder project ID `project-a44fece1-48df-4c9b-ac9` with your actual `PROJECT_ID`:
+
+```yaml
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-west1-docker.pkg.dev/PROJECT_ID/ch10-images/policy-agent-broken:latest'
+      - '-f'
+      - 'broken_agent/Dockerfile'
+      - '.'
+images:
+  - 'us-west1-docker.pkg.dev/PROJECT_ID/ch10-images/policy-agent-broken:latest'
+```
+
+### 12.2. Build the image
+From the repo root:
+
+```bash
+gcloud builds submit --project PROJECT_ID \
+  --config cloudbuild_broken.yaml \
+  .
+```
+
+### 12.3. Deploy the Broken Agent to Cloud Run
+Deploy the broken agent service and inject the required environment variables:
+
+```bash
+gcloud run deploy policy-agent-broken \
+  --project=PROJECT_ID \
+  --region=us-west1 \
+  --image=us-west1-docker.pkg.dev/PROJECT_ID/ch10-images/policy-agent-broken:latest \
+  --platform=managed \
+  --allow-unauthenticated \
+  --port 8080 \
+  --memory 1Gi \
+  --cpu 1 \
+  --set-env-vars=\
+GOOGLE_CLOUD_PROJECT=PROJECT_ID,\
+GOOGLE_CLOUD_LOCATION=us-west1,\
+AGENT_MODEL=gemini-2.0-flash-001,\
+RETRIEVAL_SERVICE_URL=https://policy-retrieval-...us-west1.run.app
+```
+
+Replace `RETRIEVAL_SERVICE_URL` with the exact Service A URL from step 10.
+
+After deployment, note the Service URL and update your `.env` file with `BROKEN_AGENT_URL`:
+
+```env
+BROKEN_AGENT_URL=https://policy-agent-broken-...us-west1.run.app
+```
+
+---
+
+## 13. Run the stateless failure demonstration (Section 10.1 & 10.2)
+
+Now run the demonstration script:
+
+```bash
+uv run python broken_agent/run_stateless_failure.py
+```
+
+### What to notice in the output:
+- **Section 10.1 (Sequential Requests)**: If the requests land on different container instances, the second request will show `cache_hits: 0`.
+- **Section 10.2 (Concurrent Requests)**: The concurrent requests are routed to different container instances, leading to `shared_state: False` and `unique_containers: 2`, illustrating that in-process state is not shared across stateless containers in the cloud.
+
+---
+
+## 14. Build and deploy Service B (policy‑agent)
+
+### 14.1. Ensure Service B uses env vars
 
 `agent_service/config.py` reads:
 
@@ -375,7 +449,7 @@ If you see a **permission error** mentioning `aiplatform.ragCorpora.get`, double
 
 Confirm there are no hard‑coded regions or project IDs.
 
-### 12.2. Create `cloudbuild.yaml` for Service B
+### 14.2. Create `cloudbuild.yaml` for Service B
 
 From the repo root:
 
@@ -397,7 +471,7 @@ EOF
 
 Replace `project-a44fece1-48df-4c9b-ac9` with your `PROJECT_ID`.
 
-### 12.3. Build the image
+### 14.3. Build the image
 
 ```bash
 gcloud builds submit --project PROJECT_ID \
@@ -405,7 +479,7 @@ gcloud builds submit --project PROJECT_ID \
   .
 ```
 
-### 12.4. Deploy Service B to Cloud Run
+### 14.4. Deploy Service B to Cloud Run
 
 ```bash
 gcloud run deploy policy-agent \
@@ -439,7 +513,7 @@ AGENT_SERVICE_URL=https://policy-agent-...us-west1.run.app
 
 ---
 
-## 13. Final validation (`validate_services.py`)
+## 15. Final validation (`validate_services.py`)
 
 From the repo root:
 
@@ -479,7 +553,7 @@ At this point, the chapter’s architecture is fully live:
 
 ---
 
-## 14. Optional: direct test queries against the agent
+## 16. Optional: direct test queries against the agent
 
 You can hit the deployed agent directly:
 
@@ -498,9 +572,10 @@ uv run python test_client/query.py
 
 ---
 
-## 15. Summary of key ideas for readers
+## 17. Summary of key ideas for readers
 
 - **Free credits** on Google Cloud make it feasible to run this chapter end‑to‑end without long‑term cost.
 - **Service A** is the **persistence boundary**: all retrieval state lives in a managed RAG Engine, not in‑process caches.
 - **Service B** remains stateless, relying on HTTP calls to Service A and can scale horizontally on Cloud Run without memory sharing issues.
 - The `validate_*` scripts are deliberately first‑class artifacts: they catch exactly the kinds of subtle misconfigurations (project IDs, regions, IAM gaps) that routinely sink cloud demos.
+
