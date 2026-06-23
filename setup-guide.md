@@ -4,8 +4,30 @@ This guide walks through every step needed to provision GCP resources, upload yo
 
 ---
 
+## Index
+
+- [Prerequisites](#prerequisites)
+  - [Create a Google Cloud Account (Free Credits)](#create-a-google-cloud-account-free-credits)
+- [Step 1 — Clone and Install](#step-1--clone-and-install)
+- [Step 2 — Configure GCP Project & Enable APIs](#step-2--configure-gcp-project--enable-apis)
+- [Step 3 — Configure Local Credentials (ADC)](#step-3--configure-local-credentials-adc)
+- [Step 4 — Build Infrastructure (Artifact Registry)](#step-4--build-infrastructure-artifact-registry)
+- [Step 5 — Create a Vertex AI RAG Corpus](#step-5--create-a-vertex-ai-rag-corpus)
+- [Step 6 — Create GCS Bucket and Ingest Policies PDF](#step-6--create-gcs-bucket-and-ingest-policies-pdf)
+- [Step 7 — Configure Environment & Validate Setup](#step-7--configure-environment--validate-setup)
+- [Step 8 — Deploy Service A: policy-retrieval](#step-8--deploy-service-a-policy-retrieval)
+- [Step 9 — Deploy Service B (broken): policy-agent-broken](#step-9--deploy-service-b-broken-policy-agent-broken)
+- [Step 10 — Run the Statelessness Failure Demonstration](#step-10--run-the-statelessness-failure-demonstration)
+- [Step 11 — Deploy Service B (fixed): policy-agent](#step-11--deploy-service-b-fixed-policy-agent)
+- [Step 12 — Validate Fixed Architecture & Run E2E Test](#step-12--validate-fixed-architecture--run-e2e-test)
+- [Troubleshooting](#troubleshooting)
+- [Build Context Note](#build-context-note)
+
+---
+
 ## Prerequisites
 
+### Tools
 | Tool | Version | Install |
 |---|---|---|
 | Python | 3.11+ | [python.org](https://python.org) |
@@ -13,9 +35,14 @@ This guide walks through every step needed to provision GCP resources, upload yo
 | gcloud CLI | latest | [cloud.google.com/sdk](https://cloud.google.com/sdk) |
 | Docker | latest | [docker.com](https://docker.com) |
 
-GCP Requirements:
-- A Google Cloud Platform project with billing enabled.
-- Authenticated `gcloud` CLI matching your project.
+### Create a Google Cloud Account (Free Credits)
+If you don't already have one, create a **Google Cloud Platform (GCP)** account:
+1. Go to <https://cloud.google.com>
+2. Sign up with your Google account  
+3. Create a **new project** and **enable billing**
+
+> [!NOTE]
+> Google typically provides **free trial credits** for new accounts. Use those credits for this chapter's exercises so you can experiment with Vertex AI and Cloud Run without incurring out-of-pocket costs. Check the current free tier and credit details in the Cloud Console billing section.
 
 ---
 
