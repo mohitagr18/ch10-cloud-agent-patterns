@@ -10,34 +10,25 @@ Companion code for Chapter 10. Shows why an agent that appears correct on a lapt
 
 ## Architecture
 
-```
-                     test_client/query.py
-                  Reader sends a live policy question
-                            |
-                       POST /query
-                            ▼
-     +------------------------------------------+
-     | Service B: policy-agent                  |
-     | FastAPI + Google ADK agent               |
-     | Cloud Run                                |
-     | - Inline tool definitions                |
-     | - Stateless request handling             |
-     | - Calls Service A via httpx              |
-     +------------------------------------------+
-                            |
-                      POST /retrieve
-                            ▼
-     +------------------------------------------+
-     | Service A: policy-retrieval              |
-     | FastAPI retrieval boundary               |
-     | Cloud Run                                |
-     | - Vertex AI RAG Engine                   |
-     | - Returns structured JSON contexts       |
-     +------------------------------------------+
-                            |
-                    Vertex AI RAG Engine
-                            ▼
-                  sunrise_healthcare_policies.pdf
+```mermaid
+flowchart TD
+    Client["test_client/query.py<br>(Sends live policy question)"]
+    
+    subgraph ServiceB["Service B: policy-agent (Cloud Run)"]
+        Agent["FastAPI + Google ADK Agent<br>- Inline tool definitions<br>- Stateless request handling<br>- Calls Service A via HTTP"]
+    end
+    
+    subgraph ServiceA["Service A: policy-retrieval (Cloud Run)"]
+        Retrieval["FastAPI Retrieval Boundary<br>- Vertex AI RAG Engine<br>- Returns structured JSON contexts"]
+    end
+    
+    RAG["Vertex AI RAG Engine"]
+    PDF["sunrise_healthcare_policies.pdf"]
+    
+    Client -- "POST /query" --> Agent
+    Agent -- "POST /retrieve" --> Retrieval
+    Retrieval -- "rag.retrieval_query()" --> RAG
+    RAG -- "Reads" --> PDF
 ```
 
 Service A is the **persistence boundary**. Service B stays stateless; all retrieval state lives in the external RAG-backed service.
@@ -153,6 +144,21 @@ For first-time setup or redeployment, see **[setup-guide.md](setup-guide.md)**.
 | Service A: policy-retrieval | `https://policy-retrieval-946002739647.us-west1.run.app` |
 | Service B (fixed): policy-agent | `https://policy-agent-klw32utc7a-uw.a.run.app` |
 | Service B (broken): policy-agent-broken | `https://policy-agent-broken-946002739647.us-west1.run.app` |
+
+---
+
+## Workflow & Manuscript Diagrams
+
+The `workflow/` directory contains chapter-friendly Mermaid diagrams explaining the core architecture and failure patterns. You can copy the Mermaid block directly into your book/manuscript:
+
+- [01-local-failure.md](workflow/01-local-failure.md) → **Section 10.1**: Local success vs cloud failure
+- [02-concurrent-workers.md](workflow/02-concurrent-workers.md) → **Section 10.2**: Concurrent workers isolation
+- [03-stateless-fix.md](workflow/03-stateless-fix.md) → **Section 10.3**: The stateless fix concept
+- [04-retrieval-service.md](workflow/04-retrieval-service.md) → **Section 10.4**: The FastAPI retrieval boundary
+- [05-end-to-end-cloud-run.md](workflow/05-end-to-end-cloud-run.md) → **Section 10.5**: End-to-end cloud infrastructure
+- [06-env-wiring.md](workflow/06-env-wiring.md) → Wiring and environment config
+- [07-broken-vs-fixed.md](workflow/07-broken-vs-fixed.md) → Side-by-side architectural comparison
+- [all-diagrams.md](workflow/all-diagrams.md) → One-file appendix containing all diagrams in sequence
 
 ---
 
