@@ -13,7 +13,7 @@ than in container memory.
 ```mermaid
 flowchart TD
     A[Service B: policy-agent gets the user question] -->|POST /retrieve| B[Service A: policy-retrieval looks up evidence]
-    B -->|Calls rag.retrieval_query()| C[Vertex AI RAG Engine stores the searchable knowledge]
+    B -->|Calls rag.retrieval_query| C[Vertex AI RAG Engine stores the searchable knowledge]
     C -->|Retrieved contexts| B
     B -->|Returns JSON contexts| A
 ```
